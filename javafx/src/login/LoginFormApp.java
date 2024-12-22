@@ -82,6 +82,9 @@ public class LoginFormApp extends Application {
 //            }
 //        });
 
+	// using inner class
+        loginButton.setOnAction(new LoginButtonHandler());
+	    
         // Scene and stage setup
         Scene scene = new Scene(grid, 400, 275);
         primaryStage.setScene(scene);
