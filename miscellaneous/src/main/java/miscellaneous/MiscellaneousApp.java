@@ -95,7 +95,7 @@ public class MiscellaneousApp {
         Thread thread2 = new Thread(new RunnableExample());
         thread2.start();
 
-        // Using Lambda for Runnable
+        // Using Lambda for Runnable -> look at this again for the exam
         Thread thread3 = new Thread(() -> {
             for (int i = 1; i <= 5; i++) {
                 System.out.println("Lambda thread: " + i);
@@ -111,7 +111,7 @@ public class MiscellaneousApp {
     
     // Part 2 continued: Multithreading
     private static void multithreadingDemo() throws InterruptedException {
-        // Thread using Runnable
+        // Thread using Runnable with a "()" lambda expression
         Thread runnableThread = new Thread(() -> {
             System.out.println("Runnable Thread: Running");
             try {
@@ -175,7 +175,7 @@ public class MiscellaneousApp {
         }
     }
 
-    // Runnable Example
+    // RunnableExample class which implements the Runnable interface
     static class RunnableExample implements Runnable {
         @Override
         public void run() {
