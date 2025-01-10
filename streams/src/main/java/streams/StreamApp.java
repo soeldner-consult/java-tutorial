@@ -1,10 +1,12 @@
 package streams;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -14,7 +16,6 @@ import java.util.stream.Stream;
 public class StreamApp {
 	
 	enum Direction {
-	
 	    LEFT("links", "gauche", "left", "izquierda", "sinistra", "лево", "lewo", "sol", "يسار", "چپ"),
 	    RIGHT("rechts", "droite", "right", "derecha", "destra", "право", "prawo", "sağ", "يمين", "راست"),
 	    FOLLOW("folgen", "suivre", "follow", "seguir", "seguire", "следовать", "podążać", "takip et", "اتبع", "پیروی کردن"),
@@ -212,6 +213,66 @@ public class StreamApp {
             });
         System.out.println();
         
+        
+        // Stream.generate from script
+        Random rnd = new Random();
+        Stream.generate(rnd::nextDouble) // method reference
+        .limit(10)       // generate 10 numbers
+        .sorted()        // sort them
+        .forEach(System.out::println);
+        
+        // Creating a stream with the iterate method
+        Stream<Integer> evenNumbers = Stream.iterate(0, n -> n + 2);
+
+        // Process the stream: limit it, map it, and print it
+        evenNumbers
+            .limit(10) // Limit to 10 elements
+            .map(n -> "Even number: " + n) // Transform each number into a string
+            .forEach(System.out::println); // Print each string
+        
+        Stream<Double> doubleNumbers = Stream.iterate(0.0, n -> n + 0.345);
+        
+        doubleNumbers.limit(30)
+        .map(n -> Math.round(n * 100.00) / 100.0) // Rounds to 2 decimal place
+        .filter(n-> n>2.5)
+        .forEach(System.out::println);
+        
+        // finite Stream with iterate, with additional Predicate
+        Stream.iterate(1, n -> n <= 10, n -> n + 1).forEach(System.out::println);
+        
+        int[] fieldWithNumbers = {-4, 6, 20, -34, 99};
+        
+        Arrays.stream(fieldWithNumbers)
+        .boxed()
+        .sorted(Comparator.reverseOrder())
+        .mapToInt(Integer::intValue)
+        .forEach(System.out::println);
+        
+        // parallel streams
+        String orderedResult = IntStream.rangeClosed(1, 10)
+        	    .parallel() // Convert the stream to a parallel stream
+        	    .mapToObj(String::valueOf) // Convert each integer to a String
+        	    .sorted() // Ensure the elements are sorted in natural order
+        	    .collect(Collectors.joining(", ")); // Join them into a single string
+
+        System.out.println("Ordered result: " + orderedResult); 
+       
+        int sumOfSquares = IntStream.rangeClosed(1, 10000)
+                .parallel() // Start with a parallel stream
+                .peek(n -> System.out.println("Parallel processing: " + n + " on " + Thread.currentThread().getName()))
+                .sequential() // Switch to sequential processing
+                .peek(n -> System.out.println("Sequential processing: " + n + " on " + Thread.currentThread().getName()))
+                .map(n -> n * n)
+                .sum(); // Sum the squares
+        
+        List<Integer> result = IntStream.rangeClosed(9951, 9955)
+        	    .parallel()
+        	    .peek(n -> System.out.println("Parallel processing: " + n + " on " + Thread.currentThread().getName()))
+        	    .boxed()
+        	    .collect(Collectors.toList());
+
+        System.out.println("Sum of squares: " + sumOfSquares);
+        
         // enums and streams
         Direction[] directions = {
                 Direction.LEFT,
@@ -223,6 +284,12 @@ public class StreamApp {
         // non-modifiable list
         List<Direction> directionList = Arrays.asList(Direction.LEFT, Direction.RIGHT, Direction.TURN_AROUND, Direction.FOLLOW);
         directionList.stream().forEach(System.out::println);
+        
+        // Create a list of all enum values
+        System.out.println("Inserting enum values directly:");
+        List<Direction> allDirections = Arrays.asList(Direction.values());
+        allDirections.stream().sorted().forEach(x->System.out.print(x+" "));
+        System.out.println();
         
         // modifiable list
 		// List<String> modifiableList = new ArrayList<>(Arrays.asList("A", "B", "C"));
@@ -239,6 +306,43 @@ public class StreamApp {
         // with a stream
         Stream.of(directions).forEach(x-> 
         	{System.out.println(x + ": " + x.getTranslation("fa"));});
+        
+        
+        // finally a flatMap example
+        System.out.println("Flat map not flat earth..");
+        List<Optional<String>> optionalList = Arrays.asList(
+                Optional.of("Apple"),
+                Optional.empty(),
+                Optional.of("Banana"),
+                Optional.empty(),
+                Optional.of("Plum")
+            );
+        
+        // in Java Streams is primarily used to flatten nested structures and transform 
+        // them into a single-level stream. This is particularly useful when each 
+        // element of a stream can be expanded into multiple elements
+        List<String> presentValues = optionalList.stream()
+            .flatMap(opt -> opt.stream()) // Flatten the non-empty optionals
+            .collect(Collectors.toList());
+
+        System.out.println(presentValues);
+        
+        List<Character> characters =
+        		"Ansbach".chars()
+        		.boxed()
+        		.map(c -> (char) c.intValue())
+        		.collect(Collectors.toList());
+        		
+        		characters
+        		.parallelStream()       		
+        		.findFirst()
+        		.ifPresent(System.out::println);
+        		
+        		characters
+        		.parallelStream()
+        		.findAny()
+        		.ifPresent(System.out::println);
+        
     }
 
 }
