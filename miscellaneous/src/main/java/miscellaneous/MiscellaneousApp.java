@@ -1,6 +1,126 @@
 package miscellaneous;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
+//Article Class:
+//
+//Implements Cloneable and overrides the clone method to perform a shallow copy.
+//The clone method simply calls super.clone().
+//Order Class:
+//
+//Contains a List<Article>.
+//Implements Cloneable and overrides the clone method to perform a deep copy.
+//The clone method creates a new Order object and iterates through the list of articles, cloning each article and adding the cloned article to the new list.
+//Example Usage:
+//
+//Demonstrates creating an Article and performing a shallow copy.
+//Demonstrates creating an Order with a list of articles and performing a deep copy.
+//Modifies the original article to show that the deep copied order remains unaffected.
+
+class Article implements Cloneable {
+    private String title;
+    private String content;
+
+    public Article(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Article article = (Article) o;
+        return Objects.equals(title, article.title) && Objects.equals(content, article.content);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, content);
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
+    @Override
+    public String toString() {
+        return "Article{" +
+                "title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                '}';
+    }
+}
+
+class Order implements Cloneable {
+    private List<Article> articles;
+
+    public Order() {
+        this.articles = new ArrayList<>();
+    }
+
+    public Order(List<Article> articles) {
+        this.articles = articles;
+    }
+
+    public List<Article> getArticles() {
+        return articles;
+    }
+
+    public void setArticles(List<Article> articles) {
+        this.articles = articles;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Order order = (Order) o;
+        return Objects.equals(articles, order.articles);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(articles);
+    }
+
+    @Override
+    protected Order clone() throws CloneNotSupportedException {
+        Order clonedOrder = (Order) super.clone();
+        clonedOrder.articles = new ArrayList<>();
+        for (Article article : this.articles) {
+            clonedOrder.articles.add((Article) article.clone());
+        }
+        return clonedOrder;
+    }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "articles=" + articles +
+                '}';
+    }
+}
 
 public class MiscellaneousApp {
 
@@ -17,17 +137,54 @@ public class MiscellaneousApp {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+        
+    // finally object cloning, shallow/deep copy..
+    try {
+		cloningDemo();
+	} catch (CloneNotSupportedException e) {
+		e.printStackTrace();
+	}
+        
     }
+    // now shallow/deep copies with objects
+    // class java.lang.CloneNotSupportedException extends java.lang.Exception
+    // so checked exception, so throws declaration here and try/catch block
+    // in the method become obligatory
+    private static void cloningDemo() throws CloneNotSupportedException {
+    	// Create an Article
+        Article article1 = new Article("Title1", "Content1");
+        Article article2 = new Article("Title2", "Content2");
 
+        // Shallow copy of Article
+        Article shallowCopiedArticle = (Article) article1.clone();
+        System.out.println("Shallow Copied Article: " + shallowCopiedArticle);
+
+        // Create an Order with a list of Articles
+        Order order = new Order(Arrays.asList(article1, article2));
+
+        // Deep copy of Order
+        Order deepCopiedOrder = order.clone();
+        System.out.println("Deep Copied Order: " + deepCopiedOrder);
+
+        // Modify the original article to see the effect on the copied order
+        article1.setTitle("Modified Title1");
+        article1.setContent("Modified Content1");
+
+        System.out.println("Original Order after modification: " + order);
+        System.out.println("Deep Copied Order after modification: " + deepCopiedOrder);
+
+    }
+    
+    
     // Part 1: Shallow and Deep Copies
     private static void demonstrateCopying() {
         // Original array (reference type)
         int[] originalArray = {1, 2, 3, 4, 5};
 
-        // Shallow copy
+        // Shallow copy of array
         int[] shallowCopy = originalArray;
 
-        // Deep copy
+        // Deep copy of arrays
         int[] deepCopy = Arrays.copyOf(originalArray, originalArray.length);
 
         System.out.println("Original array:      " + Arrays.toString(originalArray));
@@ -58,6 +215,9 @@ public class MiscellaneousApp {
         System.out.println("Original people:      " + Arrays.toString(people));
         System.out.println("Shallow copy (linked): " + Arrays.toString(shallowPeopleCopy));
         System.out.println("Deep copy (independent): " + Arrays.toString(deepPeopleCopy));
+        
+        
+        
     }
 
     static class Person {
@@ -87,12 +247,15 @@ public class MiscellaneousApp {
 
     // Part 2: Multithreading Examples
     private static void demonstrateMultithreading() {
-        // Using Thread class
-        Thread thread1 = new ThreadExample();
+        
+    	MiscellaneousApp mApp = new MiscellaneousApp();
+    	
+    	// Using Thread class
+    	Thread thread1 = new ThreadExample();
         thread1.start();
 
         // Using Runnable interface
-        Thread thread2 = new Thread(new RunnableExample());
+        Thread thread2 = new Thread(mApp.new RunnableExample());
         thread2.start();
 
         // Using Lambda for Runnable -> look at this again for the exam
@@ -176,8 +339,9 @@ public class MiscellaneousApp {
     }
 
     // RunnableExample class which implements the Runnable interface
-    static class RunnableExample implements Runnable {
-        @Override
+    class RunnableExample implements Runnable {
+    	
+    	@Override
         public void run() {
             for (int i = 1; i <= 5; i++) {
                 System.out.println("RunnableExample: " + i);
