@@ -148,8 +148,8 @@ public class MiscellaneousApp {
     }
     // now shallow/deep copies with objects
     // class java.lang.CloneNotSupportedException extends java.lang.Exception
-    // so checked exception, so throws declaration here and try/catch block
-    // in the method become obligatory
+    // this is a checked exception, throws declaration here and try/catch block
+    // in the calling method are obligatory
     private static void cloningDemo() throws CloneNotSupportedException {
     	// Create an Article
         Article article1 = new Article("Title1", "Content1");
